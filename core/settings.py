@@ -76,7 +76,6 @@ DATABASES = {
         'PORT' : config('db_port'),
     }
 }
-print(f"database:{DATABASES}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
