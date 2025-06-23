@@ -26,6 +26,7 @@ def logout_user(request):
     messages.success(request , "You have been Logged Out Successfully..")
     return redirect('home')
 
+
 def register_user(request):  # sourcery skip: extract-method
     if request.method=='POST':
         form = SignUpForm(request.POST)
