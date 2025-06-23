@@ -46,3 +46,4 @@ def register_user(request):  # sourcery skip: extract-method
         return render(request , 'register.html' , {'form' : form})
     
     return render(request , 'register.html' , {'form' : form})
+
