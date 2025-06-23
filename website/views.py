@@ -3,29 +3,31 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import *
 from .models import *
+from django.core.paginator import Paginator
+
 
 # Create your views here.
 def home(request):
-    # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, remove-unnecessary-else, swap-if-else-branches
-    
-    records = Record.objects.all()
-    
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
 
-        user = authenticate(request , username = username , password = password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request , user)
+            login(request, user)
             messages.success(request, 'You have been logged in')
             return redirect('home')
         else:
-            messages.error(request , 'There was an error logging in, Please try again later...')
+            messages.error(request, 'There was an error logging in, please try again...')
             return redirect('home')
-    
+
     else:
-        return render(request , 'home.html' , {'records' : records})
+        records = Record.objects.all().order_by('first_name')
+        paginator = Paginator(records, 5)
+        page_number = request.GET.get('page')
+        records = paginator.get_page(page_number)
+        return render(request, 'home.html', {'records': records})
 
 
 def logout_user(request):

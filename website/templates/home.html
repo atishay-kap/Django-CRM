@@ -1,61 +1,124 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-    <table class="table table-striped table-hover table-bordered">
-      <thead class="table-dark">
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Name</th>
-          <th scope="col">Email</th>
-          <th scope="col">Phone</th>
-          <th scope="col">Address</th>
-          <th scope="col">City</th>
-          <th scope="col">State</th>
-          <th scope="col">ZipCode</th>
-          <th scope="col">Created At</th>
-        </tr>
-      </thead>
-      <tbody>
-          {% if records %}
-              {% for record in records%}
-              <tr>
-                <td><a href="{% url 'record' record.id %}">{{record.id}}</a></td>
-                <td>{{record.first_name}} {{record.last_name}}</td>
-                <td>{{record.email}}</td>
-                <td>{{record.phone}}</td>
-                <td>{{record.address}}</td>
-                <td>{{record.city}}</td>
-                <td>{{record.state}}</td>
-                <td>{{record.zipcode}}</td>
-                <td>{{record.created_at}}</td>
-              </tr>
+  {% if user.is_authenticated %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Welcome, {{ user.username }}</h2>
+    </div>
+
+    <div class="card shadow mb-4">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Customer Records</h5>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped table-hover table-bordered mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>S.No</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>City</th>
+              <th>State</th>
+              <th>ZipCode</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if records %}
+              {% for record in records %}
+                <tr>
+                  <td>{{ forloop.counter0|add:records.start_index }}</td>
+                  <td>{{ record.id }}</td>
+                  <td>{{ record.first_name }} {{ record.last_name }}</td>
+                  <td>{{ record.email }}</td>
+                  <td>{{ record.phone }}</td>
+                  <td>{{ record.address }}</td>
+                  <td>{{ record.city }}</td>
+                  <td>{{ record.state }}</td>
+                  <td>{{ record.zipcode }}</td>
+                  <td>{{ record.created_at }}</td>
+                  <td>
+                    <a href="{% url 'record' record.id %}" class="btn btn-sm btn-primary">View</a>
+                    <a href="{% url 'update_record' record.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'delete_record' record.id %}" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this record?');">
+                      Delete
+                    </a>
+                  </td>
+                </tr>
               {% endfor %}
+            {% else %}
+              <tr><td colspan="11" class="text-center">No records found.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center my-4">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+
+          {% if records.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1">&laquo;</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ records.previous_page_number }}">&lsaquo;</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&lsaquo;</span></li>
           {% endif %}
 
-        </tr>
-      </tbody>
-    </table>
+          {% for num in records.paginator.page_range %}
+            {% if num >= records.number|add:'-2' and num <= records.number|add:'2' %}
+              {% if num == records.number %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
 
-    {% else %}
+          {% if records.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ records.next_page_number }}">&rsaquo;</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ records.paginator.num_pages }}">&raquo;</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&rsaquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+          {% endif %}
 
-    <div class="col col-md-6 offset-md-3">
-      <h1>Login</h1>
-      <hr>
+        </ul>
+      </nav>
+    </div>
+
+  {% else %}
+    <!-- Login Form -->
+    <div class="col-md-6 offset-md-3">
+      <h2 class="mb-3">Login</h2>
       <form method="POST" action="{% url 'home' %}">
         {% csrf_token %}
         <div class="mb-3">
           <label for="username" class="form-label">Username</label>
-          <input type="text" class="form-control" name="username" placeholder="Username" required>
+          <input type="text" class="form-control" name="username" placeholder="Enter your username" required>
         </div>
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
-          <input type="password" class="form-control" name="password" placeholder="Password" required>
+          <input type="password" class="form-control" name="password" placeholder="Enter your password" required>
         </div>
-        <br>
-        <button type="submit" class="btn btn-secondary">Login</button>
+        <button type="submit" class="btn btn-dark">Login</button>
+        <a href="{% url 'register' %}" class="btn btn-link">Don't have an account?</a>
       </form>
     </div>
-
-{% endif %}
+  {% endif %}
 {% endblock %}
